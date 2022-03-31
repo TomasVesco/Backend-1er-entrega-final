@@ -29,20 +29,27 @@ router.get('/:id?', async (req, res) => {
 router.post('/', async (req, res) => {
     try {
 
-        const { title, price , image, description, stock, code } = req.body;
+        const { title, price , image, description, stock, code, admin } = req.body;
 
-        const newProduct = {
-            title: title,
-            price: price,
-            image: image,
-            description: description,
-            stock: stock,
-            code: code
+        if(admin && admin != undefined){
+            const newProduct = {
+                title: title,
+                price: price,
+                image: image,
+                description: description,
+                stock: stock,
+                code: code
+            }
+    
+            const productToAdd = await p.save(newProduct);
+    
+            res.status(productToAdd.status).send(productToAdd.status == 200 ? 'Saved post' : 'Post not saved');
+        } else {
+            res.status(404).send({
+                error: 'Page not found',
+                description: 'This page is only for staff members'
+            });
         }
-
-        const productToAdd = await p.save(newProduct);
-
-        res.status(productToAdd.status).send(productToAdd.status == 200 ? 'Saved post' : 'Post not saved');
 
     } catch(err) {
 
