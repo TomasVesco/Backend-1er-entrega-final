@@ -20,16 +20,14 @@ router.get('/:id?', async (req, res) => {
         res.status(200).send(products);
 
     } catch(err) {
-
         res.status(404).send(err);
-
     }
 });
 
 router.post('/', async (req, res) => {
     try {
 
-        const { title, price , image, description, stock, code, admin } = req.body;
+        const { title, price, image, description, stock, code, admin } = req.body;
 
         if(admin && admin != undefined){
             const newProduct = {
@@ -52,9 +50,83 @@ router.post('/', async (req, res) => {
         }
 
     } catch(err) {
-
         res.status(404).send(err);
+    }
+});
 
+router.put('/:id', async (req, res) => {
+    try {
+
+        const id = req.params.id;
+
+        const { title, price, image, description, stock, code, admin } = req.body;
+
+        let products = await p.getAll();
+
+        if(admin && admin != undefined){
+            if(products[id - 1]){
+    
+                const newProduct = {
+                    title: title,
+                    price: price,
+                    image: image,
+                    description: description,
+                    stock: stock,
+                    code: code,
+                    id: parseInt(id)
+                }
+        
+                products = await p.deleteById(id);
+                productToAdd = await p.save(newProduct);
+        
+                res.status(200).send(productToAdd);
+            } else {
+                res.status(404).send({
+                    error: 'ID not found',
+                    description: `Product with ID:${id} does not exist`
+                });
+            }
+        } else {
+            res.status(404).send({
+                error: 'Page not found',
+                description: 'This page is only for staff members'
+            });
+        }
+
+    } catch(err) {
+        res.status(404).send(err);
+    }
+});
+
+router.delete('/:id', async (req, res) => {
+    try {
+
+        const id = req.params.id;
+
+        let products = await p.getAll();
+
+        const { admin } = req.body;
+
+        if(admin && admin != undefined){
+            if(products[id - 1] && products[0].id != 0){
+                products = await p.deleteById(id);
+
+                res.status(200).send('Saved deletion');
+            } else {
+                res.status(404).send({
+                    error: 'ID not found',
+                    description: `Product with ID:${id} does not exist`
+                });
+            }
+        } else {
+            res.status(404).send({
+                error: 'Page not found',
+                description: 'This page is only for staff members'
+            });
+        }
+
+    } catch(err) {
+        res.status(404).send(err);
     }
 });
 

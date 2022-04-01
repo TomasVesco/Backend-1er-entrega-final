@@ -13,10 +13,16 @@ class ProductContainer {
             let date = moment(new Date()).format('DD-MM-YYYY h:mm:ss a');
 
             const { title, price, image, description, stock, code } = productToAdd;
+            const id = productToAdd.id || undefined;
 
             if((title, price, image, description, stock, code) != ''){
-    
-                productToAdd.id = newFile[newFile.length - 1].id + 1;   
+   
+                if(id == undefined) {
+                    productToAdd.id = newFile[newFile.length - 1].id + 1; 
+                } else {
+                    productToAdd.id = id;
+                }
+
                 productToAdd.timestamp = date;
 
                 if(newFile[0].id == '0'){
@@ -46,7 +52,7 @@ class ProductContainer {
         try {
 
             id = parseInt(id);
-
+            
             const newFile = await this.getAll();
 
             const IdFile = newFile.find( file => file.id === id );
@@ -69,7 +75,7 @@ class ProductContainer {
     async getAll() {
         try {
             let readFile = await fs.promises.readFile( this.route, 'utf-8' ); 
-            if(readFile == ''){
+            if(readFile == '' || readFile == '[]'){
                 const obj = [
                     {id: 0}
                 ];
@@ -83,8 +89,13 @@ class ProductContainer {
     }
 
     async deleteById( id ) {
-        const newFile = await this.getAll();
+
+        let newFile = await this.getAll();
+
+        newFile = newFile.sort((a ,b) => a.id - b.id);
+
         newFile.splice(newFile.indexOf(newFile[id - 1]), 1);
+
         fs.promises.writeFile( this.route, JSON.stringify( newFile, null, 4 ));
     }
 
