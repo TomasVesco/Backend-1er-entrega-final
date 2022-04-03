@@ -20,14 +20,20 @@ class ProductContainer {
             if((title, price, image, description, stock, code) != ''){
    
                 if(id == undefined) {
-                    productToAdd.id = newFile[newFile.length - 1].id + 1;
-                } else {
-                    productToAdd.id = id;
+                    for(let i = 0; i < newFile.length ;i++){
+                        if(newFile[i].id !== i + 1 && newFile[0].id !== 0){
+                            productToAdd.id = i + 1;
+                            break;
+                        } else {
+                            productToAdd.id = newFile[newFile.length - 1].id + 1;
+                        }
+                    }
                 }
 
                 productToAdd.timestamp = date;
 
                 if(newFile[0].id == '0'){
+                    productToAdd.id = 1;
                     newFile.shift();
                 }
 

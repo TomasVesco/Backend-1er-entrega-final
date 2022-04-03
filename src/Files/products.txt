@@ -1,13 +1,13 @@
 [
     {
-        "title": "Calculadora",
-        "price": 234.56,
-        "image": "https://cdn3.iconfinder.com/data/icons/education-209/64/calculator-math-tool-school-256.png",
-        "description": "Para calcular",
+        "title": "Escuadra",
+        "price": 250,
+        "image": "https://cdn3.iconfinder.com/data/icons/education-209/64/ruler-triangle-stationary-school-256.png",
+        "description": "Para medir",
         "stock": 100,
-        "code": "Ventas",
+        "code": "ventas",
         "id": 1,
-        "timestamp": "03-04-2022 1:42:14 am"
+        "timestamp": "03-04-2022 10:13:07 am"
     },
     {
         "title": "Calculadora",
@@ -17,6 +17,6 @@
         "stock": 100,
         "code": "Ventas",
         "id": 3,
-        "timestamp": "03-04-2022 1:51:39 am"
+        "timestamp": "03-04-2022 10:14:16 am"
     }
 ]
