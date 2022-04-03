@@ -5,6 +5,9 @@ const router = Router();
 const CartContainer = require('../Class/cartClass');
 const c = new CartContainer('./src/Files/cart.txt');
 
+const ProductContainer = require('../Class/productClass');
+const p = new ProductContainer('./src/Files/products.txt');
+
 router.get('/:id/productos', async (req, res) => {
     try {
 
@@ -40,20 +43,38 @@ router.post('/:id/productos', async (req, res) => {
 
         const id = req.params.id;
 
-        const { title, price, image, description, stock, code } = req.body;
+        const { productId } = req.body;
 
-        const newProduct = {
-            title: title,
-            price: price,
-            image: image,
-            description: description,
-            stock: stock,
-            code: code
+        const existProductId = await p.getById(productId);
+
+        const existCartId = await c.getById(id);
+
+        if(!isNaN(productId)){
+            if(existProductId.id != 0 && existProductId.id != undefined){
+                if(existCartId.status === 200){
+                    
+                    const cart = await c.save(existProductId, id);
+
+                    res.status(200).send(cart);
+
+                } else {
+                    res.status(existCartId.status).send({
+                        error: 'ID not found',
+                        description: `Cart with ID:${id} does not exist`,
+                    });
+                }
+            } else {
+                res.status(404).send({
+                    error: 'ID not found',
+                    description: `Product with ID:${id} does not exist`
+                }); 
+            }
+        } else {
+            res.status(404).send({
+                error: 'ID is a character',
+                description: `Only numbers are accepted`
+            });
         }
-
-        console.log('en ruta post :id');
-
-        res.status(200).send('hola');
 
     } catch(err) {
         res.status(404).send(err);

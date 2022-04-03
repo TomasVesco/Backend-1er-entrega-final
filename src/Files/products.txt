@@ -16,7 +16,7 @@
         "description": "Para calcular",
         "stock": 100,
         "code": "Ventas",
-        "id": 3,
+        "id": 2,
         "timestamp": "03-04-2022 10:14:16 am"
     }
 ]

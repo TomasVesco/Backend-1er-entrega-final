@@ -53,12 +53,16 @@ class CartContainer {
         }
     }
 
-    async save( productToAdd ) { 
+    async save( productToAdd, id ) { 
         try {
 
-            let date = moment(new Date()).format('DD-MM-YYYY h:mm:ss a');
+            let cart = await this.getAll();
+
+            cart[id - 1].products.push(productToAdd);
                 
-            fs.writeFileSync( this.route, JSON.stringify( newFile, null, 4 ));
+            fs.writeFileSync( this.route, JSON.stringify( cart, null, 4 ));
+
+            return JSON.stringify(cart);
 
         } catch(error) {
             console.log(error);
@@ -84,7 +88,7 @@ class CartContainer {
                 } else {
                     return {
                         error: 'ID not found',
-                        description: `Product with ID:${id} does not exist`,
+                        description: `Cart with ID:${id} does not exist`,
                         status: 404
                     };
                 }
