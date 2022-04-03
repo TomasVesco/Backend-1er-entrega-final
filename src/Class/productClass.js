@@ -10,6 +10,8 @@ class ProductContainer {
     async save( productToAdd ) { 
         try {
             const newFile = await this.getAll();
+            newFile.sort((a, b) => a.id - b.id);
+
             let date = moment(new Date()).format('DD-MM-YYYY h:mm:ss a');
 
             const { title, price, image, description, stock, code } = productToAdd;
@@ -18,7 +20,7 @@ class ProductContainer {
             if((title, price, image, description, stock, code) != ''){
    
                 if(id == undefined) {
-                    productToAdd.id = newFile[newFile.length - 1].id + 1; 
+                    productToAdd.id = newFile[newFile.length - 1].id + 1;
                 } else {
                     productToAdd.id = id;
                 }
@@ -29,7 +31,9 @@ class ProductContainer {
                     newFile.shift();
                 }
 
-                newFile.push( productToAdd );     
+                newFile.push( productToAdd );    
+                
+                newFile.sort((a, b) => a.id - b.id);
                 
                 fs.writeFileSync( this.route, JSON.stringify( newFile, null, 4 ));
 
@@ -90,13 +94,28 @@ class ProductContainer {
 
     async deleteById( id ) {
 
-        let newFile = await this.getAll();
+        if(!isNaN(id)){
+            id = parseInt(id);
 
-        newFile = newFile.sort((a ,b) => a.id - b.id);
+            let newFile = await this.getAll();
+    
+            const productToDelete = id => newFile.find(product => product.id === id);
+    
+            const index = newFile.indexOf(productToDelete(id));
 
-        newFile.splice(newFile.indexOf(newFile[id - 1]), 1);
+            if(index !== -1){
+                newFile.splice(index, 1);
+    
+                newFile.sort((a, b) => a.id - b.id);
+        
+                fs.promises.writeFile( this.route, JSON.stringify( newFile, null, 4 ));
 
-        fs.promises.writeFile( this.route, JSON.stringify( newFile, null, 4 ));
+                return 1;
+            } else {
+                return 0
+            }
+        }
+        return -1
     }
 
     async deleteAll() {

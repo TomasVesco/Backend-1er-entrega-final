@@ -61,31 +61,34 @@ router.put('/:id', async (req, res) => {
 
         const { title, price, image, description, stock, code, admin } = req.body;
 
-        let products = await p.getAll();
-
         if(admin && admin != undefined){
-            if(products[id - 1]){
+            const newProduct = {
+                title: title,
+                price: price,
+                image: image,
+                description: description,
+                stock: stock,
+                code: code,
+                id: parseInt(id)
+            }
     
-                const newProduct = {
-                    title: title,
-                    price: price,
-                    image: image,
-                    description: description,
-                    stock: stock,
-                    code: code,
-                    id: parseInt(id)
-                }
-        
-                products = await p.deleteById(id);
-                productToAdd = await p.save(newProduct);
-        
-                res.status(200).send(productToAdd);
-            } else {
+            proceed = await p.deleteById(id);
+
+            if(proceed === 1){
+                await p.save(newProduct);
+                res.status(200).send(newProduct);
+            } else if(proceed === 0){
                 res.status(404).send({
                     error: 'ID not found',
                     description: `Product with ID:${id} does not exist`
                 });
+            } else if(proceed === -1){
+                res.status(404).send({
+                    error: 'ID is a character',
+                    description: `Only numbers are accepted`
+                });
             }
+
         } else {
             res.status(404).send({
                 error: 'Page not found',
@@ -103,21 +106,26 @@ router.delete('/:id', async (req, res) => {
 
         const id = req.params.id;
 
-        let products = await p.getAll();
-
         const { admin } = req.body;
 
         if(admin && admin != undefined){
-            if(products[id - 1] && products[0].id != 0){
-                products = await p.deleteById(id);
+    
+            proceed = await p.deleteById(id);
 
-                res.status(200).send('Saved deletion');
-            } else {
+            if(proceed === 1){
+                res.status(200).send('Product deleted');
+            } else if(proceed === 0){
                 res.status(404).send({
                     error: 'ID not found',
                     description: `Product with ID:${id} does not exist`
                 });
+            } else if(proceed === -1){
+                res.status(404).send({
+                    error: 'ID is a character',
+                    description: `Only numbers are accepted`
+                });
             }
+
         } else {
             res.status(404).send({
                 error: 'Page not found',
