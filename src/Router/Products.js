@@ -1,9 +1,9 @@
 const { Router } = require('express');
 
+const router = Router();
+
 const ProductContainer = require('../Class/productClass');
 const p = new ProductContainer('./src/Files/products.txt');
-
-const router = Router();
 
 router.get('/:id?', async (req, res) => {
     try {

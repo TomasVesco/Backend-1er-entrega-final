@@ -9,8 +9,9 @@ class ProductContainer {
 
     async save( productToAdd ) { 
         try {
-            const newFile = await this.getAll();
-            newFile.sort((a, b) => a.id - b.id);
+
+            const products = await this.getAll();
+            products.sort((a, b) => a.id - b.id);
 
             let date = moment(new Date()).format('DD-MM-YYYY h:mm:ss a');
 
@@ -20,30 +21,31 @@ class ProductContainer {
             if((title, price, image, description, stock, code) != ''){
    
                 if(id == undefined) {
-                    for(let i = 0; i < newFile.length ;i++){
-                        if(newFile[i].id !== i + 1 && newFile[0].id !== 0){
+                    for(let i = 0; i < products.length ;i++){
+                        if(products[i].id !== i + 1 && products[0].id !== 0){
                             productToAdd.id = i + 1;
                             break;
                         } else {
-                            productToAdd.id = newFile[newFile.length - 1].id + 1;
+                            productToAdd.id = products[products.length - 1].id + 1;
                         }
                     }
                 }
 
                 productToAdd.timestamp = date;
 
-                if(newFile[0].id == '0'){
+                if(products[0].id == '0'){
                     productToAdd.id = 1;
-                    newFile.shift();
+                    products.shift();
                 }
 
-                newFile.push( productToAdd );    
+                products.push( productToAdd );    
                 
-                newFile.sort((a, b) => a.id - b.id);
+                products.sort((a, b) => a.id - b.id);
                 
-                fs.writeFileSync( this.route, JSON.stringify( newFile, null, 4 ));
+                fs.writeFileSync( this.route, JSON.stringify( products, null, 4 ));
 
-                return {...newFile, status: 200};
+                return {...products, status: 200};
+
             } else {
                 return {
                     error: 'Missing an argument',
@@ -63,9 +65,9 @@ class ProductContainer {
 
             id = parseInt(id);
             
-            const newFile = await this.getAll();
+            const products = await this.getAll();
 
-            const IdFile = newFile.find( file => file.id === id );
+            const IdFile = products.find( file => file.id === id );
     
             if ( IdFile ) {
                 return {...IdFile, status: 200};
@@ -84,15 +86,19 @@ class ProductContainer {
 
     async getAll() {
         try {
+
             let readFile = await fs.promises.readFile( this.route, 'utf-8' ); 
+
             if(readFile == '' || readFile == '[]'){
                 const obj = [
                     {id: 0}
                 ];
                 fs.promises.writeFile( this.route, JSON.stringify(obj));
             }
+
             readFile = await fs.promises.readFile( this.route, 'utf-8' ); 
-            return JSON.parse( readFile );         
+            return JSON.parse( readFile ); 
+
         } catch(error) {
             console.log(error);
         }
@@ -103,18 +109,18 @@ class ProductContainer {
         if(!isNaN(id)){
             id = parseInt(id);
 
-            let newFile = await this.getAll();
+            let products = await this.getAll();
     
-            const productToDelete = id => newFile.find(product => product.id === id);
+            const productToDelete = id => products.find(product => product.id === id);
     
-            const index = newFile.indexOf(productToDelete(id));
+            const index = products.indexOf(productToDelete(id));
 
             if(index !== -1){
-                newFile.splice(index, 1);
+                products.splice(index, 1);
     
-                newFile.sort((a, b) => a.id - b.id);
+                products.sort((a, b) => a.id - b.id);
         
-                fs.promises.writeFile( this.route, JSON.stringify( newFile, null, 4 ));
+                fs.promises.writeFile( this.route, JSON.stringify( products, null, 4 ));
 
                 return 1;
             } else {
