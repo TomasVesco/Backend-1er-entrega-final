@@ -1,7 +1,7 @@
 [
     {
         "id": 1,
-        "timestamp": "31-03-2022 5:56:38 pm",
+        "timestamp": "05-04-2022 3:03:03 pm",
         "products": [
             {
                 "title": "Escuadra",
@@ -11,17 +11,19 @@
                 "stock": 100,
                 "code": "ventas",
                 "id": 1,
-                "timestamp": "31-03-2022 5:56:38 pm"
+                "timestamp": "03-04-2022 10:13:07 am",
+                "status": 200
             },
             {
-                "title": "Escuadra",
-                "price": 250,
-                "image": "https://cdn3.iconfinder.com/data/icons/education-209/64/ruler-triangle-stationary-school-256.png",
-                "description": "Para medir",
+                "title": "Calculadora",
+                "price": 234.56,
+                "image": "https://cdn3.iconfinder.com/data/icons/education-209/64/calculator-math-tool-school-256.png",
+                "description": "Para calcular",
                 "stock": 100,
-                "code": "ventas",
+                "code": "Ventas",
                 "id": 2,
-                "timestamp": "31-03-2022 5:56:38 pm"
+                "timestamp": "03-04-2022 10:14:16 am",
+                "status": 200
             }
         ]
     }

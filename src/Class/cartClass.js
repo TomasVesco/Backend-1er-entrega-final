@@ -40,7 +40,7 @@ class CartContainer {
                     products: []
                 } 
 
-            cart.push( newCart );    
+            cart.push(newCart);    
             
             cart.sort((a, b) => a.id - b.id);
             
@@ -53,7 +53,7 @@ class CartContainer {
         }
     }
 
-    async save( productToAdd, id ) { 
+    async save(productToAdd, id) { 
         try {
 
             let cart = await this.getAll();
@@ -69,7 +69,7 @@ class CartContainer {
         }
     }
 
-    async getById( id ) {
+    async getById(id) {
         try {
 
             if(!isNaN(id)){
@@ -77,7 +77,7 @@ class CartContainer {
             
                 const cart = await this.getAll();
     
-                const IdCart = cart.find( cart => cart.id === id );
+                const IdCart = cart.find( cart => cart.id == id );
                    
                 if ( IdCart ) {
                     if(IdCart.products != ''){
@@ -126,20 +126,58 @@ class CartContainer {
         }
     }
 
-    async deleteById( id ) {
+    async deleteByCartAndProductId( cartParamsId, productParamsId) {
         try {
 
-            fs.promises.writeFile( this.route, JSON.stringify( newFile, null, 4 ));    
+            cartParamsId = parseInt(cartParamsId);
+            productParamsId = parseInt(productParamsId);
+
+            let cart = await this.getAll();
+    
+            let deleteProductFromCart = cart.find( cart => cart.id == cartParamsId );
+            const productToDelete = deleteProductFromCart.products.find(product => product.id == productParamsId);
+
+            console.log(productToDelete);
+
+            if(deleteProductFromCart.products != '' && productToDelete != undefined){
+
+                const index = deleteProductFromCart.products.indexOf(productToDelete);
+    
+                cart[cartParamsId - 1].products.splice(index, 1);
+    
+                fs.promises.writeFile( this.route, JSON.stringify( cart, null, 4 ));  
+                
+                return ({
+                    status: 200,
+                    message: 'Delete ok'
+                });
+
+            } else {
+                return ({
+                    status: 404,
+                    error: `Product with ID:${productParamsId} is't in the cart`
+                });
+            }
 
         } catch(error) {
             console.log(error);
         }
     }
 
-    async deleteAll() {
+    async deleteAllCartId(id) {
         try {
 
-            fs.promises.writeFile( this.route, '' );   
+            id = parseInt(id);
+
+            let cart = await this.getAll();
+
+            const IdCart = cart.find( cart => cart.id === id );
+    
+            const index = cart.indexOf(IdCart);
+
+            cart.splice(index, 1);
+
+            fs.promises.writeFile( this.route, JSON.stringify (cart, null, 4));   
 
         } catch(error) {
             console.log(error);
