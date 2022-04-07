@@ -1,138 +1,129 @@
-const fs = require('fs');
-const moment = require('moment');
+const fs = require("fs");
+const moment = require("moment");
 
 class ProductContainer {
+  constructor(route) {
+    this.route = route;
+  }
 
-    constructor( route ) {
-        this.route = route;
-    }
+  async updateById(id, newData) {
+    const products = await this.getAll();
+    const indexProduct = products.findIndex((product) => product.id === id);
 
-    async save( productToAdd ) { 
-        try {
+    if (indexProduct === -1) return -1; //Aca tendrias que ver como lo manejas si no existe
 
-            const products = await this.getAll();
-            products.sort((a, b) => a.id - b.id);
+    // si da distinto de -1 es que lo encontro
+    const { title, price, image, description, stock, code } = newData; // digamos que acá queremos modificar todas esas variables
+    /// copiamos lo que tenia en esa posición para que nos traiga el id, y el timestamp (opcional, podrias actualizarlo tambien), y le ponemos las nuevas variables
+    const newProduct = {
+      ...products[indexProduct],
+      title,
+      price,
+      image,
+      description,
+      stock,
+      code,
+    };
+    products[indexProduct] = newProduct;
 
-            let date = moment(new Date()).format('DD-MM-YYYY h:mm:ss a');
+    fs.writeFileSync(this.route, JSON.stringify(products, null, 4));
 
-            const { title, price, image, description, stock, code } = productToAdd;
-            const id = productToAdd.id || undefined;
+    // respondemos que fue con exito (formato que prefieras para manejar)
 
-            if((title, price, image, description, stock, code) != ''){
-   
-                if(id == undefined) {
-                    for(let i = 0; i < products.length ;i++){
-                        if(products[i].id !== i + 1 && products[0].id !== 0){
-                            productToAdd.id = i + 1;
-                            break;
-                        } else {
-                            productToAdd.id = products[products.length - 1].id + 1;
-                        }
-                    }
-                }
+    return newProduct;
+  }
 
-                productToAdd.timestamp = date;
-
-                if(products[0].id == '0'){
-                    productToAdd.id = 1;
-                    products.shift();
-                }
-
-                products.push( productToAdd );    
-                
-                products.sort((a, b) => a.id - b.id);
-                
-                fs.writeFileSync( this.route, JSON.stringify( products, null, 4 ));
-
-                return {...products, status: 200};
-
-            } else {
-                return {
-                    error: 'Missing an argument',
-                    description: 'One or more arguments have not been entered',
-                    status: 404
-                }
-            }
-        }
-
-        catch(error) {
-            console.log(error);
-        }
-    }
-
-    async getById( id ) {
-        try {
-
-            id = parseInt(id);
-            
-            const products = await this.getAll();
-
-            const IdFile = products.find( file => file.id === id );
+  async save(productToAdd) {
+    try {
     
-            if ( IdFile ) {
-                return {...IdFile, status: 200};
-            } else {
-                return {
-                    error: 'ID not found',
-                    description: `Product with ID:${id} does not exist`,
-                    status: 404
-                };
-            }
+      const { title, price, image, description, stock, code } = productToAdd;
+      const products = await this.getAll();
 
-        } catch(error) {
-            console.log(error);
-        }
+      const date = moment(new Date()).format("DD-MM-YYYY h:mm:ss a");
+
+      const newProduct = {
+        id: products[products.length - 1].id + 1,
+        timestamp: date,
+        title,
+        price,
+        image,
+        description,
+        stock,
+        code,
+      }
+
+      products.push(newProduct)
+
+      fs.writeFileSync(this.route, JSON.stringify(products, null, 4));
+
+      return newProduct;
+
+    } catch (error) {
+        console.log(error);
     }
+  }
 
-    async getAll() {
-        try {
+  async getById(id) {
+    try {
+      id = parseInt(id);
 
-            let readFile = await fs.promises.readFile( this.route, 'utf-8' ); 
+      const products = await this.getAll();
 
-            if(readFile == '' || readFile == '[]'){
-                const obj = [
-                    {id: 0}
-                ];
-                fs.promises.writeFile( this.route, JSON.stringify(obj));
-            }
+      const IdFile = products.find((file) => file.id === id);
 
-            readFile = await fs.promises.readFile( this.route, 'utf-8' ); 
-            return JSON.parse( readFile ); 
-
-        } catch(error) {
-            console.log(error);
-        }
+      if (IdFile) {
+        return { ...IdFile, status: 200 };
+      } else {
+        return {
+          error: "ID not found",
+          description: `Product with ID:${id} does not exist`,
+          status: 404,
+        };
+      }
+    } catch (error) {
+      console.log(error);
     }
+  }
 
-    async deleteById( id ) {
+  async getAll() {
+    try {
 
-        if(!isNaN(id)){
-            id = parseInt(id);
+      let readFile = await fs.promises.readFile(this.route, "utf-8");
 
-            let products = await this.getAll();
-    
-            const productToDelete = id => products.find(product => product.id === id);
-    
-            const index = products.indexOf(productToDelete(id));
+      if (readFile == "" || readFile == "[]") {
+        const obj = [{ id: 0 }];
+        fs.promises.writeFile(this.route, JSON.stringify(obj));
+      }
 
-            if(index !== -1){
-                products.splice(index, 1);
-    
-                products.sort((a, b) => a.id - b.id);
-        
-                fs.promises.writeFile( this.route, JSON.stringify( products, null, 4 ));
+      readFile = await fs.promises.readFile(this.route, "utf-8");
+      
+      return JSON.parse(readFile);
 
-                return 1;
-            } else {
-                return 0
-            }
-        }
-        return -1
+    } catch (error) {
+      console.log(error);
     }
+  }
 
-    async deleteAll() {
-        fs.promises.writeFile( this.route, '' );
-    }
+  async deleteById(id) {
+
+      if(!id) return -1 // o lo que quieras para el error
+
+      const products = await this.getAll()
+      // depende del tipo de dato de id, podrias usar un parseInt si es necesario pasarlo a number, así usas el comparador más "fuerte" !==
+      const productFound = products.find(product => product.id === parseInt(id))
+
+      if(!productFound) return 0 // por si no existe, si existe sigue
+
+      const newProducts = products.filter(product => product.id !== parseInt(id))
+
+      fs.promises.writeFile(this.route, JSON.stringify(newProducts, null, 4));
+
+      return 1
+  }
+
+  async deleteAll() {
+    fs.promises.writeFile(this.route, "");
+  }
 }
 
 module.exports = ProductContainer;
