@@ -7,14 +7,15 @@ class ProductContainer {
   }
 
   async updateById(id, newData) {
+
     const products = await this.getAll();
     const indexProduct = products.findIndex((product) => product.id === id);
 
+    const date = moment(new Date()).format("DD-MM-YYYY h:mm:ss a");
+
     if (indexProduct === -1) return -1; //Aca tendrias que ver como lo manejas si no existe
 
-    // si da distinto de -1 es que lo encontro
-    const { title, price, image, description, stock, code } = newData; // digamos que acá queremos modificar todas esas variables
-    /// copiamos lo que tenia en esa posición para que nos traiga el id, y el timestamp (opcional, podrias actualizarlo tambien), y le ponemos las nuevas variables
+    const { title, price, image, description, stock, code } = newData;
     const newProduct = {
       ...products[indexProduct],
       title,
@@ -23,12 +24,11 @@ class ProductContainer {
       description,
       stock,
       code,
+      timestamp: date
     };
     products[indexProduct] = newProduct;
 
     fs.writeFileSync(this.route, JSON.stringify(products, null, 4));
-
-    // respondemos que fue con exito (formato que prefieras para manejar)
 
     return newProduct;
   }
@@ -50,6 +50,10 @@ class ProductContainer {
         description,
         stock,
         code,
+      }
+      
+      if(products[0].id === 0){
+        products.shift();
       }
 
       products.push(newProduct)
@@ -106,19 +110,21 @@ class ProductContainer {
 
   async deleteById(id) {
 
-      if(!id) return -1 // o lo que quieras para el error
+      if(!id) return -1;
 
       const products = await this.getAll()
-      // depende del tipo de dato de id, podrias usar un parseInt si es necesario pasarlo a number, así usas el comparador más "fuerte" !==
+     
       const productFound = products.find(product => product.id === parseInt(id))
 
-      if(!productFound) return 0 // por si no existe, si existe sigue
+      if(!productFound) return 0;
 
       const newProducts = products.filter(product => product.id !== parseInt(id))
 
       fs.promises.writeFile(this.route, JSON.stringify(newProducts, null, 4));
 
-      return 1
+      await this.getAll();
+
+      return 1;
   }
 
   async deleteAll() {

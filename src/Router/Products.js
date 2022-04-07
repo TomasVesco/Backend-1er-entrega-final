@@ -18,7 +18,7 @@ router.get("/:id?", async (req, res) => {
 
     products = await p.getAll();
     res.status(200).send(products);
-    
+
   } catch (err) {
     res.status(404).send(err);
   }
@@ -84,13 +84,16 @@ router.put("/:id", async (req, res) => {
 
     const response = await p.updateById(id, newProduct);
 
-    if (response === -1)
+    if (response !== -1) {
+
+      res.status(200).send(response);
+
+    } else {
       res.status(404).send({
         error: "ID not found",
         description: `Product with ID:${id} does not exist`,
       });
-
-    res.status(200).send(response);
+    }
 
   } catch (err) {
     res.status(404).send(err);
@@ -114,7 +117,7 @@ router.delete("/:id", async (req, res) => {
           error: "ID not found",
           description: `Product with ID:${id} does not exist`,
         });
-      } else if (proceed === -1) {   // esta podria ser la primer validacion, sin esperar la respuesta de la clase, entonces verificamos el formato arriba de todo, si esta mal, respondemos enseguida, y si no ahi si llamamos a deletebyid
+      } else if (proceed === -1) {   
         res.status(404).send({
           error: "ID is a character",
           description: `Only numbers are accepted`,
