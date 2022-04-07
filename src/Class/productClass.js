@@ -13,7 +13,7 @@ class ProductContainer {
 
     const date = moment(new Date()).format("DD-MM-YYYY h:mm:ss a");
 
-    if (indexProduct === -1) return -1; //Aca tendrias que ver como lo manejas si no existe
+    if (indexProduct === -1) return -1;
 
     const { title, price, image, description, stock, code } = newData;
     const newProduct = {

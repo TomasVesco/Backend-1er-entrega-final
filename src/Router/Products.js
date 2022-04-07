@@ -1,4 +1,5 @@
 const { Router } = require("express");
+const { isAdmin } = require("../Middlewares/isAdmin");
 
 const router = Router();
 
@@ -22,13 +23,12 @@ router.get("/:id?", async (req, res) => {
   } catch (err) {
     res.status(404).send(err);
   }
-
 });
 
-router.post("/", async (req, res) => {
+router.post("/", [isAdmin], async (req, res) => {
   try {
     
-    const { title, price, image, description, stock, code, admin } = req.body;
+    const { title, price, image, description, stock, code } = req.body;
 
     const propertyEmpty = [];
     
@@ -40,8 +40,6 @@ router.post("/", async (req, res) => {
 
     if(propertyEmpty.length === 0){
 
-      if (admin && admin != undefined) {
-
         const newProduct = {
           title,
           price,
@@ -50,18 +48,12 @@ router.post("/", async (req, res) => {
           stock,
           code,
         } 
+        
         const response = await p.save(newProduct);
 
         res.status(200).send(response);
 
-      }else {
-        res.status(404).send({
-          error: "Page not found",
-          description: "This page is only for staff members",
-        });
-      }
-
-    } else {
+      } else {
       res.status(404).send({
         error: 'Argument null',
         description: `The argument ${propertyEmpty} have been no completed`
@@ -73,14 +65,14 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", [isAdmin], async (req, res) => {
   try {
 
     const id = parseInt(req.params.id);
 
-    const { title, price, image, description, stock, code, admin } = req.body;
+    const { title, price, image, description, stock, code } = req.body;
 
-    const newProduct = { title, price, image, description, stock, code, admin };
+    const newProduct = { title, price, image, description, stock, code };
 
     const response = await p.updateById(id, newProduct);
 
@@ -100,35 +92,27 @@ router.put("/:id", async (req, res) => {
   } 
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", [isAdmin], async (req, res) => {
   try {
 
     const id = req.params.id;
 
-    const { admin } = req.body;
+    proceed = await p.deleteById(id);
 
-    if (admin && admin != undefined) {
-      proceed = await p.deleteById(id);
-
-      if (proceed === 1) {
-        res.status(200).send("Product deleted");
-      } else if (proceed === 0) {
-        res.status(404).send({
-          error: "ID not found",
-          description: `Product with ID:${id} does not exist`,
-        });
-      } else if (proceed === -1) {   
-        res.status(404).send({
-          error: "ID is a character",
-          description: `Only numbers are accepted`,
-        });
-      }
-    } else {
+    if (proceed === 1) {
+      res.status(200).send("Product deleted");
+    } else if (proceed === 0) {
       res.status(404).send({
-        error: "Page not found",
-        description: "This page is only for staff members",
+        error: "ID not found",
+        description: `Product with ID:${id} does not exist`,
+      });
+    } else if (proceed === -1) {   
+      res.status(404).send({
+        error: "ID is a character",
+        description: `Only numbers are accepted`,
       });
     }
+    
 
   } catch (err) {
     res.status(404).send(err);
